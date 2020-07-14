@@ -1,4 +1,4 @@
-from urllib.parse import unquote, urlparse, parse_qs
+from urllib.parse import unquote, urlparse
 
 from fastapi.testclient import TestClient
 

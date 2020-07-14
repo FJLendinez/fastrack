@@ -13,14 +13,12 @@ services:
     depends_on:
       - db
     environment:
-      DOMAIN: 'localhost:8100'
-      PROTOCOL: 'http'
+      DOMAIN: 'http://localhost:8100'
       DATABASE_URL: 'postgresql://fastrackuser:fastrackpass@db:5432/fastrack'
     ports:
       - "8100:8000"
   db:
     image: postgres
-    container_name: sqlalchemy-orm-psql
     environment:
       POSTGRES_PASSWORD: 'fastrackpass'
       POSTGRES_USER: 'fastrackuser'

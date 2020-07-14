@@ -8,7 +8,11 @@ from django.apps import apps
 from fastrack import settings as fastrack_settings
 from django.conf import settings
 
-settings.configure(fastrack_settings)
+try:
+    settings.configure(fastrack_settings)
+except RuntimeError:
+    pass
+
 apps.populate(settings.INSTALLED_APPS)
 
 
@@ -26,3 +30,6 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(api_router)
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info")

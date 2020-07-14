@@ -4,4 +4,4 @@ RUN mkdir /code
 WORKDIR /code
 COPY . /code/
 RUN pip install -r requirements.txt
-CMD gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app
+CMD python main.py
