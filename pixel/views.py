@@ -73,8 +73,7 @@ async def analyze(request: Request,
         "history_uuid": h or '',
     }
     PageViewModel.objects.create(**page_view)
-    response.headers['Cache-Control'] = 'private, no-cache'
-    return Response(content=PIXEL, media_type='image/gif')
+    return {"msg": "ok"}
 
 
 @router.get('/a.js')
