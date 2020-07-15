@@ -20,7 +20,8 @@ def test_tracker():
     s = "5fdb53d1-7895-41bb-885f-bb0359686720"
     t = "fastrack%20-%20Swagger%20UI"
     ref = "google.com%2Fbest"
-    request = f"/a.gif?url={url}&ref={ref}&t={t}&s={s}&h={h}"
+    ts = 146.24
+    request = f"/a.gif?url={url}&ref={ref}&t={t}&s={s}&h={h}&ts={ts}"
     response = client.get(request)
     assert response.status_code == 200
     assert response.headers['content-type'] == 'image/gif'
@@ -31,6 +32,7 @@ def test_tracker():
     assert pv.url == urlparse(unquote(url)).path
     assert pv.domain == urlparse(unquote(url)).netloc
     assert pv.referrer == unquote(ref)
+    assert pv.time_spent == ts
 
 
 def test_identifier():
