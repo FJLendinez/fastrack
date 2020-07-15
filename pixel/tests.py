@@ -24,7 +24,7 @@ def test_tracker():
     request = f"/a.gif?url={url}&ref={ref}&t={t}&s={s}&h={h}&ts={ts}"
     response = client.get(request)
     assert response.status_code == 200
-    assert response.headers['content-type'] == 'image/gif'
+    assert response.headers['content-type'] == 'application/json'
     pv: PageViewModel = PageViewModel.objects.last()
     assert str(pv.session_uuid) == s
     assert str(pv.history_uuid) == h
