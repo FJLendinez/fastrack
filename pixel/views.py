@@ -57,7 +57,9 @@ async def analyze(request: Request,
                   h: Optional[str],
                   ref: Optional[str],
                   referer: Optional[str] = Header(None)):
-    ip = request.headers.get('HTTP_X_FORWARDED_FOR', request.headers.get('REMOTE_ADDR', ''))
+    ip = request.headers.get('x-forwarded-for') \
+         or request.headers.get('remote_addr') \
+         or request.headers.get('x-real-ip')
     parsed = urlparse(url)
     page_view = {
         "headers": dict(request.headers),
