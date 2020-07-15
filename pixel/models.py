@@ -10,6 +10,7 @@ class PageViewModel(models.Model):
     url = models.CharField(max_length=250)
     timestamp = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200)
+    time_spent = models.FloatField(default=0)
     ip = models.CharField(max_length=20, null=True)
     referrer = models.CharField(max_length=120)
     headers = fields.JSONField(null=True)
@@ -27,6 +28,9 @@ class PageViewModel(models.Model):
 class UserModel(models.Model):
     email = models.CharField(max_length=120)
     history_uuid = models.UUIDField()
+
+    class Meta:
+        unique_together = ('email', 'history_uuid')
 
     @property
     def pageviews(self):

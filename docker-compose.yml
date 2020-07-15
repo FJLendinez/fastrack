@@ -14,7 +14,11 @@ services:
       - db
     environment:
       DOMAIN: 'http://localhost:8100'
-      DATABASE_URL: 'postgresql://fastrackuser:fastrackpass@db:5432/fastrack'
+      DB_NAME: 'fastrack'
+      DB_USER: 'fastrackuser'
+      DB_PASSWORD: 'fastrackpass'
+      DB_HOST: 'db'
+      DB_PORT: '5432'
     ports:
       - "8100:8000"
   db:

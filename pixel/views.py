@@ -4,31 +4,46 @@ from urllib.parse import urlparse, parse_qs
 from uuid import uuid4
 
 from django.conf import settings
-from fastapi import APIRouter, Request, Response, Header
+from django.db import IntegrityError
+from fastapi import APIRouter, Request, Response, Header, HTTPException
 
 from pixel.models import PageViewModel, UserModel
+from pixel.schemas import TestSchema
 
 router = APIRouter()
 
 JAVASCRIPT = """
+    var fastrack_start = new Date();
+    
+    function httpGetAsync(theUrl)
+    {{
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", theUrl, true); 
+        xmlHttp.send(null);
+    }}
+
     function fastrack_identify(email) {{
     var e=encodeURIComponent;
     var h = localStorage.getItem('h');
     if (!h) {{ return false }};
-    var d=document,i=new Image,e=encodeURIComponent;
-    i.src='{domain}/identify?email='+e(email)+'&h='+h;
+    httpGetAsync('{domain}/identify?email='+e(email)+'&h='+h);
     }}
-    (function(){{
-    var h = localStorage.getItem('h');
-    if (!h) {{ localStorage.setItem('h', '{history_uuid}') }};
-    h = localStorage.getItem('h');
+    function fastrack_trackview(){{
+        try {{
+        var time_spent = (new Date() - fastrack_start) / 1000;
+        
+        var h = localStorage.getItem('h');
+        if (!h) {{ localStorage.setItem('h', '{history_uuid}') }};
+        h = localStorage.getItem('h');
 
-    var s = sessionStorage.getItem('s');
-    if (!s) {{ sessionStorage.setItem('s','{session_uuid}') }};
-    s = sessionStorage.getItem('s');
-    var d=document,i=new Image,e=encodeURIComponent;
-    i.src='{domain}/a.gif?url='+e(d.location.href)+'&ref='+e(d.referrer)+'&t='+e(d.title)+'&s='+e(s)+'&h='+e(h);
-    }})()""".replace('\n', '')
+        var s = sessionStorage.getItem('s');
+        if (!s) {{ sessionStorage.setItem('s','{session_uuid}') }};
+        s = sessionStorage.getItem('s');
+        var d=document, e=encodeURIComponent;
+        httpGetAsync('{domain}/a.gif?url='+e(d.location.href)+'&ref='+e(d.referrer)+'&t='+e(d.title)+'&s='+e(s)+'&h='+e(h)+'&ts='+(time_spent));
+        }} catch(error) {{localStorage.setItem('error', error.message)}}
+    }};
+    window.addEventListener('beforeunload', fastrack_trackview);""".replace('\n', '')
 
 PIXEL = b64decode('R0lGODlhAQABAIAAANvf7wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==')
 
@@ -38,18 +53,21 @@ async def analyze(request: Request,
                   response: Response,
                   url: str,
                   t: Optional[str],
+                  ts: Optional[float],
                   s: Optional[str],
                   h: Optional[str],
                   ref: Optional[str],
                   referer: Optional[str] = Header(None)):
     ip = request.headers.get('HTTP_X_FORWARDED_FOR', request.headers.get('REMOTE_ADDR', ''))
     parsed = urlparse(url)
+    print(referer or ref or '')
     page_view = {
         "headers": dict(request.headers),
         "params": dict(request.query_params),
         "referrer": referer or ref or '',
         "ip": ip,
         "title": t or '',
+        "time_spent": ts or 0,
         "domain": parsed.netloc,
         "url": parsed.path,
         "query": parse_qs(parsed.query),
@@ -76,5 +94,13 @@ async def identify(email: str,
         "email": email,
         "history_uuid": h,
     }
-    UserModel.objects.create(**user)
+    try:
+        UserModel.objects.create(**user)
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="Identifier previously assigned")
     return {"msg": "assigned"}
+
+
+@router.get('/test', response_model=TestSchema)
+async def identify():
+    return UserModel.objects.last()
