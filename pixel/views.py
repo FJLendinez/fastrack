@@ -4,7 +4,6 @@ from urllib.parse import urlparse, parse_qs
 from uuid import uuid4
 
 from django.conf import settings
-from django.db import IntegrityError
 from fastapi import APIRouter, Request, Response, Header, HTTPException
 
 from pixel.models import PageViewModel, UserModel
@@ -94,10 +93,12 @@ async def identify(email: str,
         "email": email,
         "history_uuid": h,
     }
-    try:
+
+    if UserModel.objects.filter(history_uuid=h).exclude(email=email).exists():
+        raise HTTPException(status_code=400, detail="Identifier previously assigned to another user")
+
+    if not UserModel.objects.filter(history_uuid=h, email=email).exists():
         UserModel.objects.create(**user)
-    except IntegrityError:
-        raise HTTPException(status_code=400, detail="Identifier previously assigned")
     return {"msg": "assigned"}
 
 
