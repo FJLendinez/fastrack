@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+
 # =============== This schemas are for testing purposes ========
 class PageView(BaseModel):
     domain: str
@@ -16,6 +17,7 @@ class PageView(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class TestSchema(BaseModel):
     email: str

@@ -7,7 +7,6 @@ from django.conf import settings
 from fastapi import APIRouter, Request, Response, Header, HTTPException
 
 from pixel.models import PageViewModel, UserModel
-from pixel.schemas import TestSchema
 
 router = APIRouter()
 
@@ -97,11 +96,7 @@ async def identify(email: str,
     if UserModel.objects.filter(history_uuid=h).exclude(email=email).exists():
         raise HTTPException(status_code=400, detail="Identifier previously assigned to another user")
 
-    if not UserModel.objects.filter(history_uuid=h, email=email).exists():
+    if not UserModel.objects.filter(**user).exists():
         UserModel.objects.create(**user)
     return {"msg": "assigned"}
 
-
-@router.get('/test', response_model=TestSchema)
-async def identify():
-    return UserModel.objects.last()
