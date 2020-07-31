@@ -12,22 +12,11 @@ services:
       - .:/code
     depends_on:
       - db
-    environment:
-      PIXEL_DOMAIN: 'http://localhost:8100'
-      DB_NAME: 'fastrack'
-      DB_USER: 'fastrackuser'
-      DB_PASSWORD: 'fastrackpass'
-      DB_HOST: 'db'
-      DB_PORT: '5432'
     ports:
       - "8100:8000"
   db:
     image: postgres
     env_file:
       - .env
-    environment:
-      POSTGRES_PASSWORD: 'fastrackpass'
-      POSTGRES_USER: 'fastrackuser'
-      POSTGRES_DB: 'fastrack'
     ports:
       - "5800:5432"
