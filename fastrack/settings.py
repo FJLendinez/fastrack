@@ -25,11 +25,11 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.get('DB_NAME', str, 'fastrack'),
-        'USER': env.get('DB_USER', str, 'fastrackuser'),
-        'PASSWORD': env.get('DB_PASSWORD', str, 'fastrackpass'),
-        'HOST': env.get('DB_HOST', str, 'localhost'),
-        'PORT': env.get('DB_PORT', int, 5800),
+        'NAME': env.get('POSTGRES_DB', str, 'fastrack'),
+        'USER': env.get('POSTGRES_USER', str, 'fastrackuser'),
+        'PASSWORD': env.get('POSTGRES_PASSWORD', str, 'fastrackpass'),
+        'HOST': env.get('POSTGRES_HOST', str, 'localhost'),
+        'PORT': env.get('POSTGRES_PORT', int, 5800),
     }
 }
 
