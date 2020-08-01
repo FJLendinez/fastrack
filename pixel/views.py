@@ -10,38 +10,8 @@ from pixel.models import PageViewModel, UserModel
 
 router = APIRouter()
 
-JAVASCRIPT = """
-    var fastrack_start = new Date();
-    
-    function httpGetAsync(theUrl)
-    {{
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", theUrl, true); 
-        xmlHttp.send(null);
-    }}
-
-    function fastrack_identify(email) {{
-    var e=encodeURIComponent;
-    var h = localStorage.getItem('h');
-    if (!h) {{ return false }};
-    httpGetAsync('{domain}/identify?email='+e(email)+'&h='+h);
-    }}
-    function fastrack_trackview(){{
-        try {{
-        var time_spent = (new Date() - fastrack_start) / 1000;
-        
-        var h = localStorage.getItem('h');
-        if (!h) {{ localStorage.setItem('h', '{history_uuid}') }};
-        h = localStorage.getItem('h');
-
-        var s = sessionStorage.getItem('s');
-        if (!s) {{ sessionStorage.setItem('s','{session_uuid}') }};
-        s = sessionStorage.getItem('s');
-        var d=document, e=encodeURIComponent;
-        httpGetAsync('{domain}/a.gif?url='+e(d.location.href)+'&ref='+e(d.referrer)+'&t='+e(d.title)+'&s='+e(s)+'&h='+e(h)+'&ts='+(time_spent));
-        }} catch(error) {{localStorage.setItem('error', error.message)}}
-    }};
-    window.addEventListener('beforeunload', fastrack_trackview);""".replace('\n', '')
+with open('pixel/tracker.js', 'r') as tracker:
+    JAVASCRIPT = tracker.read()
 
 PIXEL = b64decode('R0lGODlhAQABAIAAANvf7wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==')
 
