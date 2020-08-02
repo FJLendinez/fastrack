@@ -17,12 +17,12 @@ class PageViewModel(models.Model):
     params = fields.JSONField(null=True)
     query = fields.JSONField(null=True)
 
-    @property
-    def user(self):
-        try:
-            return UserModel.objects.get(history_uuid=self.history_uuid).email
-        except:
-            return None
+    # @property
+    # def user(self):
+    #     try:
+    #         return UserModel.objects.get(history_uuid=self.history_uuid).email
+    #     except:
+    #         return None
 
 
 class UserModel(models.Model):
@@ -32,11 +32,11 @@ class UserModel(models.Model):
     class Meta:
         unique_together = ('email', 'history_uuid')
 
-    @property
-    def pageviews(self):
-        return list(PageViewModel.objects.filter(history_uuid=self.history_uuid))
-
-    @property
-    def sessions(self):
-        return list(PageViewModel.objects.values_list('session_uuid', flat=True)\
-            .filter(history_uuid=self.history_uuid).distinct())
+    # @property
+    # def pageviews(self):
+    #     return list(PageViewModel.objects.filter(history_uuid=self.history_uuid))
+    #
+    # @property
+    # def sessions(self):
+    #     return list(PageViewModel.objects.values_list('session_uuid', flat=True)\
+    #         .filter(history_uuid=self.history_uuid).distinct())
