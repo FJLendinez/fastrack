@@ -4,6 +4,7 @@ from django.conf.global_settings import *
 from typing import List
 from starlette.config import Config
 from pydantic import AnyHttpUrl
+from starlette.datastructures import CommaSeparatedStrings
 
 env = Config('.env')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,3 +39,5 @@ PROJECT_NAME = "fastrack"
 BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
 DOMAIN = env.get('PIXEL_DOMAIN', str, 'http://localhost:8000')
+
+PRIVATE_ACCESS_KEYS = list(env.get('PRIVATE_ACCESS_KEYS', CommaSeparatedStrings, ""))
