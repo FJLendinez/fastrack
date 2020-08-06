@@ -16,6 +16,7 @@ class PageViewModel(models.Model):
     headers = fields.JSONField(null=True)
     params = fields.JSONField(null=True)
     query = fields.JSONField(null=True)
+    metadata = fields.JSONField(null=True)
 
     # @property
     # def user(self):

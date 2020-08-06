@@ -30,8 +30,11 @@ function fastrack_trackview(e) {{
             sessionStorage.setItem('s', '{session_uuid}')
         }};
         s = sessionStorage.getItem('s');
+        if (window.fastrack_metadata) {{
+            var meta = JSON.stringify(window.fastrack_metadata)
+        }}
         var d = document, e = encodeURIComponent;
-        httpGetAsync('{domain}/a.gif?url=' + e(d.location.href) + '&ref=' + e(d.referrer) + '&t=' + e(d.title) + '&s=' + e(s) + '&h=' + e(h) + '&ts=' + (time_spent));
+        httpGetAsync('{domain}/a.gif?url=' + e(d.location.href) + '&ref=' + e(d.referrer) + '&t=' + e(d.title) + '&s=' + e(s) + '&h=' + e(h) + '&ts=' + (time_spent) + '&meta=' + e(meta));
         fastrack_start = new Date();
 
     }} catch (error) {{

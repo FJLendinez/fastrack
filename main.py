@@ -10,7 +10,7 @@ from django.conf import settings
 
 try:
     settings.configure(fastrack_settings)
-except RuntimeError:
+except RuntimeError:  # Avoid: 'Settings already configured.'
     pass
 
 apps.populate(settings.INSTALLED_APPS)
