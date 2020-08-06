@@ -85,11 +85,9 @@ async def identify(email: str,
 @router.get('/track', response_model=List[PageView])
 async def get_track_of_email(email: str,
                              x_access_key=Header(None)):
-    print(x_access_key, settings.PRIVATE_ACCESS_KEYS)
     if x_access_key not in settings.PRIVATE_ACCESS_KEYS:
         raise HTTPException(status_code=401, detail="You can not access to this resource")
 
     queryset = list(PageViewModel.objects.filter(
         history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True)))
-    print(queryset)
     return queryset
