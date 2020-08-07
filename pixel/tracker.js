@@ -33,6 +33,7 @@ function fastrack_trackview(e) {{
         if (window.fastrack_metadata) {{
             var meta = JSON.stringify(window.fastrack_metadata)
         }}
+        window.fastrack_metadata = null
         var d = document, e = encodeURIComponent;
         httpGetAsync('{domain}/a.gif?url=' + e(d.location.href) + '&ref=' + e(d.referrer) + '&t=' + e(d.title) + '&s=' + e(s) + '&h=' + e(h) + '&ts=' + (time_spent) + '&meta=' + e(meta));
         fastrack_start = new Date();
