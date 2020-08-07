@@ -1,5 +1,6 @@
 import json
 from base64 import b64decode
+from datetime import datetime
 from json.decoder import JSONDecodeError
 from typing import Optional, List
 from urllib.parse import urlparse, parse_qs
@@ -84,10 +85,13 @@ async def identify(email: str,
 
 @router.get('/track', response_model=List[PageView])
 async def get_track_of_email(email: str,
+                             timestamp: datetime = None,
                              x_access_key=Header(None)):
     if x_access_key not in settings.PRIVATE_ACCESS_KEYS:
         raise HTTPException(status_code=401, detail="You can not access to this resource")
 
-    queryset = list(PageViewModel.objects.filter(
-        history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True)))
-    return queryset
+    queryset = PageViewModel.objects.filter(
+        history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True))
+    if timestamp:
+        queryset = queryset.filter(timestamp__gte=timestamp)
+    return list(queryset)
