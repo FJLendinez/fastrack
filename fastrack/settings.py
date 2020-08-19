@@ -36,7 +36,7 @@ DATABASES = {
 
 PROJECT_NAME = "fastrack"
 
-BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = list(env.get('BACKEND_CORS_ORIGINS', CommaSeparatedStrings, ""))
 
 DOMAIN = env.get('PIXEL_DOMAIN', str, 'http://localhost:8000')
 
