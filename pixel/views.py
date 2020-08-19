@@ -23,7 +23,6 @@ PIXEL = b64decode('R0lGODlhAQABAIAAANvf7wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
 
 @router.get('/a.gif')
 async def analyze(request: Request,
-                  response: Response,
                   url: str,
                   t: Optional[str],
                   ts: Optional[float],
@@ -41,6 +40,10 @@ async def analyze(request: Request,
         meta = None
         msg = "Metadata invalid"
     parsed = urlparse(url)
+
+    if parsed.netloc not in settings.FASTRACK_ALLOWED_HOSTS:
+        return Response({"msg": "Invalid host"}, status_code=400)
+
     page_view = {
         "headers": dict(request.headers),
         "params": dict(request.query_params),
