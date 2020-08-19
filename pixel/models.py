@@ -3,6 +3,8 @@ from django.db import models
 
 
 class PageViewModel(models.Model):
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+
     history_uuid = models.UUIDField()
     session_uuid = models.UUIDField()
 
