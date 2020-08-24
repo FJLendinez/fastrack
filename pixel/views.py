@@ -7,8 +7,8 @@ from urllib.parse import urlparse, parse_qs
 from uuid import uuid4
 
 from django.conf import settings
-from django.db.models import F
-from fastapi import APIRouter, Request, Response, Header, HTTPException
+from django.db.models import Max, Count, Min, Avg, Sum, Q
+from fastapi import APIRouter, Request, Response, Header, HTTPException, Depends
 
 from pixel.models import PageViewModel, UserModel
 from pixel.schemas import PageView
@@ -19,6 +19,7 @@ with open('pixel/tracker.js', 'r') as tracker:
     JAVASCRIPT = tracker.read()
 
 PIXEL = b64decode('R0lGODlhAQABAIAAANvf7wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==')
+page_view_fields = [field.name for field in PageViewModel._meta.fields]
 
 
 @router.get('/a.gif')
@@ -98,3 +99,53 @@ async def get_track_of_email(email: str,
     if timestamp:
         queryset = queryset.filter(timestamp__gte=timestamp)
     return list(queryset)
+
+
+@router.get('/analytics')
+async def analytics(request: Request,
+                    groupby: str = "id",
+                    operations: str = "count",
+                    operation_value: str = "id"):
+    """
+    This endpoint automatically calculate the operations max, min, count and avg
+    of a value, grouped by a selected field.
+    Each combination of operator and values are cached during ANALYTICS_CACHE seconds.
+    In certain cases this could be better than get an endpoint with all the needed queries collected.
+    Params:
+      *  operation (default count)
+      *  operation_value: field to apply the operator (default id)
+      *  groupby: field to group (default id)
+      *  [...] All the filters added automatically by model
+    Return:
+      A collection of dictionaries that follows this format
+      {'field_grouped': 'field_grouped_value', <operator>: <operator value>}
+    """
+    operators = {'max': Max, 'count': Count, 'min': Min, 'avg': Avg, 'sum': Sum}
+    filters = []
+    for k, v in request.query_params.items():
+        if k in ('groupby', 'operation_value'):
+            continue
+        if k in page_view_fields:
+            filters.append(Q(**{k: v}))
+        if "__" in k and k.split('__')[0] in page_view_fields:
+            filters.append(Q(**{k: v}))
+
+    queryset = PageViewModel.objects.all().filter(*filters)
+    if groupby not in page_view_fields:
+        raise HTTPException(status_code=400,
+                            detail=f"You can group by {groupby}, try with one of this {page_view_fields}")
+
+    queryset = queryset.order_by(groupby).values(groupby)
+
+    if operation_value not in page_view_fields:
+        raise HTTPException(status_code=400,
+                            detail=f"You can operate with {operation_value}, try with one of this {page_view_fields}")
+
+    operation_names = operations.split(',')
+
+    annotations = dict(
+        (operation_name, operators.get(operation_name, Count)(operation_value)) for operation_name in
+        operation_names)
+
+    queryset = queryset.annotate(**annotations)
+    return list(queryset.values(groupby, *operation_names))
