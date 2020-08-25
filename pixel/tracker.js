@@ -9,10 +9,15 @@ function httpGetAsync(theUrl) {{
 function fastrack_identify(email) {{
     var e = encodeURIComponent;
     var h = localStorage.getItem('h');
+    var i = localStorage.getItem('i');
     if (!h) {{
         return false
     }};
+    if (i && h === i){
+        return false
+    }
     httpGetAsync('{domain}/identify?email=' + e(email) + '&h=' + h);
+    localStorage.setItem('i', h)
 }}
 
 function fastrack_trackview(e) {{

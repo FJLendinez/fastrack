@@ -87,12 +87,15 @@ async def identify(email: str,
     return {"msg": "assigned"}
 
 
+def have_access_key(x_access_key=Header(None)):
+    if x_access_key not in settings.PRIVATE_ACCESS_KEYS:
+        raise HTTPException(status_code=401, detail="You can not access to this resource")
+    return x_access_key
+
 @router.get('/track', response_model=List[PageView])
 async def get_track_of_email(email: str,
                              timestamp: datetime = None,
-                             x_access_key=Header(None)):
-    if x_access_key not in settings.PRIVATE_ACCESS_KEYS:
-        raise HTTPException(status_code=401, detail="You can not access to this resource")
+                             x_access_key=Depends(have_access_key)):
 
     queryset = PageViewModel.objects.filter(
         history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True))
@@ -105,7 +108,8 @@ async def get_track_of_email(email: str,
 async def analytics(request: Request,
                     groupby: str = "id",
                     operations: str = "count",
-                    operation_value: str = "id"):
+                    operation_value: str = "id",
+                    x_access_key=Depends(have_access_key)):
     """
     This endpoint automatically calculate the operations max, min, count and avg
     of a value, grouped by a selected field.
@@ -123,8 +127,6 @@ async def analytics(request: Request,
     operators = {'max': Max, 'count': Count, 'min': Min, 'avg': Avg, 'sum': Sum}
     filters = []
     for k, v in request.query_params.items():
-        if k in ('groupby', 'operation_value'):
-            continue
         if k in page_view_fields:
             filters.append(Q(**{k: v}))
         if "__" in k and k.split('__')[0] in page_view_fields:
