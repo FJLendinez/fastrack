@@ -13,9 +13,9 @@ function fastrack_identify(email) {{
     if (!h) {{
         return false
     }};
-    if (i && h === i){
+    if (i && h === i){{
         return false
-    }
+    }}
     httpGetAsync('{domain}/identify?email=' + e(email) + '&h=' + h);
     localStorage.setItem('i', h)
 }}
