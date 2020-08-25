@@ -47,9 +47,5 @@ function fastrack_trackview(e) {{
         localStorage.setItem('error', error.message)
     }}
 }};
-var pushState = history.pushState;
-history.pushState = function () {{
-    pushState.apply(history, arguments);
-    fireEvents('pushState', arguments);  // Some event-handling function
-}};
+
 window.addEventListener('beforeunload', fastrack_trackview);
