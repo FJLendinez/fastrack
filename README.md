@@ -37,7 +37,31 @@ and run
 
 Use `/a.js` endpoint to have the client functionality
 
-It will track automatically when `beforeunload` event is triggered, but you can use `fastrack_trackview()` function to handle manually this behaviour.
+### Track views
+
+To can track on every web framework with ease, **fastrack doesn't track automatically**, instead of this here you have recipes for your favourite front taste. 
+
+#### VanillaJS
+
+```js
+window.addEventListener('beforeunload', window.fastrack_trackview);
+```
+When `beforeunload` event is triggered, you can use `fastrack_trackview()` function to track the current page and time spent on it.
+
+#### Vue
+
+```js
+var first_load = true
+router.beforeEach((from, to, next) => {
+    if (first_load) {
+        first_load = false
+    } else {
+        window.fastrack_trackview()
+    }
+    return next() 
+})
+```
+Thanks to router guards we can control how to track, but it always launch `beforeEach` guard at the begining so we need to flag the first call.
 
 ### Identify users
 
