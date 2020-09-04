@@ -14,7 +14,7 @@ class PageViewModel(models.Model):
     title = models.CharField(max_length=200)
     time_spent = models.FloatField(default=0)
     ip = models.CharField(max_length=20, null=True)
-    referrer = models.CharField(max_length=120)
+    referrer = models.CharField(max_length=255)
     headers = fields.JSONField(null=True)
     params = fields.JSONField(null=True)
     query = fields.JSONField(null=True)

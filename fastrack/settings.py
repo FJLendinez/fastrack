@@ -42,4 +42,4 @@ DOMAIN = env.get('PIXEL_DOMAIN', str, 'http://localhost:8000')
 
 PRIVATE_ACCESS_KEYS = list(env.get('PRIVATE_ACCESS_KEYS', CommaSeparatedStrings, ""))
 
-FASTRACK_ALLOWED_HOSTS = list(env.get('FASTRACK_ALLOWED_HOSTS', CommaSeparatedStrings, ""))
+FASTRACK_ALLOWED_HOSTS = list(env.get('FASTRACK_ALLOWED_HOSTS', CommaSeparatedStrings, "127.0.0.1:8000"))

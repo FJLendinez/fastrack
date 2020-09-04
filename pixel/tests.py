@@ -1,5 +1,6 @@
+import json
 from unittest import TestCase
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urlparse, quote
 from uuid import uuid4
 
 from django.core.management import call_command
@@ -35,19 +36,21 @@ class ASDFTestCase(TestCase):
         s = "5fdb53d1-7895-41bb-885f-bb0359686720"
         t = "fastrack%20-%20Swagger%20UI"
         ref = "google.com%2Fbest"
+        meta = quote('{"status": "done"}')
         ts = 146.24
-        request = f"/a.gif?url={url}&ref={ref}&t={t}&s={s}&h={h}&ts={ts}"
+        request = f"/a.gif?url={url}&ref={ref}&t={t}&s={s}&h={h}&ts={ts}&meta={meta}"
         response = client.get(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['content-type'], 'application/json')
         pv: PageViewModel = PageViewModel.objects.last()
         self.assertEqual(str(pv.session_uuid), s)
-        self.assertEqual(str(pv.history_uuid),  h)
+        self.assertEqual(str(pv.history_uuid), h)
         self.assertEqual(pv.title, unquote(t))
         self.assertEqual(pv.url, urlparse(unquote(url)).path)
         self.assertEqual(pv.domain, urlparse(unquote(url)).netloc)
         self.assertEqual(pv.referrer, unquote(ref))
         self.assertEqual(pv.time_spent, ts)
+        self.assertEqual(pv.metadata, json.loads(unquote(meta)))
 
     def test_identifier(self):
         email = "lendi@fakemail.com"
@@ -58,7 +61,6 @@ class ASDFTestCase(TestCase):
         self.assertEqual(response.headers['content-type'], 'application/json')
         user: UserModel = UserModel.objects.get(history_uuid=h)
         self.assertEqual(user.email, email)
-
 
     def test_assert_identification_is_unique(self):
         email = "lendi2@fakemail.com"

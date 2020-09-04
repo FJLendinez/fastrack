@@ -9,6 +9,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.db.models import Max, Count, Min, Avg, Sum, Q
 from fastapi import APIRouter, Request, Response, Header, HTTPException, Depends
+from starlette.responses import JSONResponse
 
 from pixel.models import PageViewModel, UserModel
 from pixel.schemas import PageView
@@ -43,17 +44,18 @@ async def analyze(request: Request,
     parsed = urlparse(url)
 
     if parsed.netloc not in settings.FASTRACK_ALLOWED_HOSTS:
-        return Response({"msg": "Invalid host"}, status_code=400)
+        print(parsed.netloc)
+        return JSONResponse({"msg": "Invalid host"} , status_code=400)
 
     page_view = {
         "headers": dict(request.headers),
         "params": dict(request.query_params),
-        "referrer": ref or request.headers.get('referer') or '',
+        "referrer": (ref or request.headers.get('referer') or '')[:255],
         "ip": ip,
-        "title": t or '',
+        "title": (t or '')[:200],
         "time_spent": ts or 0,
         "domain": parsed.netloc,
-        "url": parsed.path,
+        "url": parsed.path[:250],
         "query": parse_qs(parsed.query),
         "session_uuid": s or '',
         "history_uuid": h or '',
