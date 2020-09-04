@@ -48,5 +48,4 @@ function fastrack_trackview(e) {{
     }}
 }};
 
-// Handle manually fastrack_trackview
-// window.addEventListener('beforeunload', fastrack_trackview);
+window.addEventListener('beforeunload', fastrack_trackview);

@@ -131,7 +131,6 @@ async def analytics(request: Request,
             filters.append(Q(**{k: v}))
         if "__" in k and k.split('__')[0] in page_view_fields:
             filters.append(Q(**{k: v}))
-
     queryset = PageViewModel.objects.all().filter(*filters)
     if groupby not in page_view_fields:
         raise HTTPException(status_code=400,
