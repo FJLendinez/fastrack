@@ -45,7 +45,7 @@ async def analyze(request: Request,
 
     if parsed.netloc not in settings.FASTRACK_ALLOWED_HOSTS:
         print(parsed.netloc)
-        return JSONResponse({"msg": "Invalid host"} , status_code=400)
+        return JSONResponse({"msg": "Invalid host"}, status_code=400)
 
     page_view = {
         "headers": dict(request.headers),
@@ -94,13 +94,17 @@ def have_access_key(x_access_key=Header(None)):
         raise HTTPException(status_code=401, detail="You can not access to this resource")
     return x_access_key
 
+
 def page_view_filters(request: Request):
     filters = []
     for k, v in request.query_params.items():
         if k in page_view_fields:
             filters.append(Q(**{k: v}))
         if "__" in k and k.split('__')[0] in page_view_fields:
-            filters.append(Q(**{k: v}))
+            if k.split('__')[1] == 'isnull':
+                filters.append(Q(**{k: v == 'true'}))
+            else:
+                filters.append(Q(**{k: v}))
     return filters
 
 
@@ -109,7 +113,6 @@ async def get_track_of_email(email: str,
                              timestamp: datetime = None,
                              filters=Depends(page_view_filters),
                              x_access_key=Depends(have_access_key)):
-
     queryset = PageViewModel.objects.filter(
         history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True)).filter(*filters)
     if timestamp:
