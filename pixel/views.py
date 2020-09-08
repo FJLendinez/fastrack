@@ -94,13 +94,24 @@ def have_access_key(x_access_key=Header(None)):
         raise HTTPException(status_code=401, detail="You can not access to this resource")
     return x_access_key
 
+def page_view_filters(request: Request):
+    filters = []
+    for k, v in request.query_params.items():
+        if k in page_view_fields:
+            filters.append(Q(**{k: v}))
+        if "__" in k and k.split('__')[0] in page_view_fields:
+            filters.append(Q(**{k: v}))
+    return filters
+
+
 @router.get('/track', response_model=List[PageView])
 async def get_track_of_email(email: str,
                              timestamp: datetime = None,
+                             filters=Depends(page_view_filters),
                              x_access_key=Depends(have_access_key)):
 
     queryset = PageViewModel.objects.filter(
-        history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True))
+        history_uuid__in=UserModel.objects.filter(email=email).values_list('history_uuid', flat=True)).filter(*filters)
     if timestamp:
         queryset = queryset.filter(timestamp__gte=timestamp)
     return list(queryset)
@@ -111,6 +122,7 @@ async def analytics(request: Request,
                     groupby: str = "id",
                     operations: str = "count",
                     operation_value: str = "id",
+                    filters=Depends(page_view_filters),
                     x_access_key=Depends(have_access_key)):
     """
     This endpoint automatically calculate the operations max, min, count and avg
@@ -127,12 +139,7 @@ async def analytics(request: Request,
       {'field_grouped': 'field_grouped_value', <operator>: <operator value>}
     """
     operators = {'max': Max, 'count': Count, 'min': Min, 'avg': Avg, 'sum': Sum}
-    filters = []
-    for k, v in request.query_params.items():
-        if k in page_view_fields:
-            filters.append(Q(**{k: v}))
-        if "__" in k and k.split('__')[0] in page_view_fields:
-            filters.append(Q(**{k: v}))
+
     queryset = PageViewModel.objects.all().filter(*filters)
     if groupby not in page_view_fields:
         raise HTTPException(status_code=400,
