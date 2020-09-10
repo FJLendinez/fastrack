@@ -39,13 +39,12 @@ Use `/a.js` endpoint to have the client functionality
 
 ### Track views
 
-To can track on every web framework with ease, **fastrack doesn't track automatically**, instead of this here you have recipes for your favourite front taste. 
-
-#### VanillaJS
+To can track on every web framework with ease, **fastrack track automatically** using 
 
 ```js
 window.addEventListener('beforeunload', window.fastrack_trackview);
 ```
+
 When `beforeunload` event is triggered, you can use `fastrack_trackview()` function to track the current page and time spent on it.
 
 #### Vue
