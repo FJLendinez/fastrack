@@ -43,8 +43,11 @@ async def analyze(request: Request,
         msg = "Metadata invalid"
     parsed = urlparse(url)
 
+    path = parsed.path[:250]
+    if path.endswith('/'):
+        path = path[:-1]
+
     if parsed.netloc not in settings.FASTRACK_ALLOWED_HOSTS:
-        print(parsed.netloc)
         return JSONResponse({"msg": "Invalid host"}, status_code=400)
 
     page_view = {
@@ -55,7 +58,7 @@ async def analyze(request: Request,
         "title": (t or '')[:200],
         "time_spent": ts or 0,
         "domain": parsed.netloc,
-        "url": parsed.path[:250],
+        "url": path,
         "query": parse_qs(parsed.query),
         "session_uuid": s or '',
         "history_uuid": h or '',
