@@ -1,4 +1,5 @@
 var fastrack_start = new Date();
+var fastrack_time_count = 0
 
 function httpGetAsync(theUrl) {{
     var xmlHttp = new XMLHttpRequest();
@@ -20,9 +21,35 @@ function fastrack_identify(email) {{
     localStorage.setItem('i', h)
 }}
 
+function fastrack_time_off() {{
+    fastrack_time_count = fastrack_time_count + (new Date() - fastrack_start) / 1000;
+    console.log('current tracking time:', fastrack_time_count)
+    fastrack_start = null
+}}
+
+function fastrack_time_on() {{
+    fastrack_start = new Date()
+    console.log('starting again:', fastrack_start)
+
+}}
+
+document.addEventListener("visibilitychange", function() {{
+  if (document.hidden){{
+      fastrack_time_off()
+  }} else {{
+      fastrack_time_on()
+  }}
+}});
+
 function fastrack_trackview(e) {{
     try {{
-        var time_spent = (new Date() - fastrack_start) / 1000;
+        var time_spent = 0
+        if (fastrack_start) {{
+            time_spent = fastrack_time_count + (new Date() - fastrack_start) / 1000;
+        }} else {{
+            time_spent = fastrack_time_count
+        }}
+        console.log('current tracking time:', time_spent)
 
         var h = localStorage.getItem('h');
         if (!h) {{
